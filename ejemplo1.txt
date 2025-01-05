@@ -1,2 +1,1 @@
-es el primer ejemplo
-para el 2° commit
+es el 1° commit, para la nueva rama main2musica
