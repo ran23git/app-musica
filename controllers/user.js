@@ -1,3 +1,7 @@
+//importaciones
+const validate = require("../helpers/validate");
+
+//accion de prueba
 const prueba = (req, res) => {
     return res.status(200).send({
         status: "success",
@@ -18,6 +22,15 @@ if(!params.name || !params.nick || !params.email || !params.password) {//si no e
 }
 
     //3-validar los datos
+   try{
+    validate(params);
+   }catch(error){
+    return res.status(400).send({
+        status: "error",
+        message: "Validacion NO SUPERADA"
+    });
+   }
+
     //4-control usuarios duplicados
     //5-cifrar la contraseña
     //6-crear objeto del usuario
