@@ -4,5 +4,7 @@ const prueba = (req, res) => {
         message: "Mensaje enviado desde CONTROLLER/user.js"
     });
 }
+//REGISTRAR un usuario
+
 
 module.exports = {prueba}
