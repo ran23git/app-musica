@@ -10,6 +10,8 @@ const { prueba } = require("../controllers/user");
 
 //definir RUTAS
 router.get("/prueba", UserController.prueba)
+router.post("/register", UserController.register)//guarda info en backend
+ 
 
 //exportar ROUTES
 module.exports = router;
