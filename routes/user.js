@@ -10,8 +10,8 @@ const UserController = require("../controllers/user");//y ya tengo acceso a todo
 const { register } = require("../controllers/user");
 
 //definir RUTAS
-router.post("/register", UserController.register)//guarda info en backend
-
+router.post("/register", UserController.register);//guarda info en backend
+router.post("/login",    UserController.login);   //Lee    info en backend
 
 //exportar ROUTES
 module.exports = router;

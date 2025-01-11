@@ -4,13 +4,13 @@ const bcrypt = require("bcryptjs"); // librería para encriptar contraseñas,
 const User = require("../models/user"); // modelo de datos para interactuar con la base de datos
 
 
-//REGISTRAR un usuario 
+//1-REGISTRAR un usuario  ######################################################################################################
 //register realiza una petición HTTP para registrar un nuevo usuario. Recibe como parámetros req (la solicitud) y res (la respuesta).
 const register = async (req, res) => {
     //1-recoger los datos de la peticion
     let params = req.body;//asi recojo todo lo que me llega por el body
     
-    //2-comprobar q me llegan bien
+    //2-comprobar q me llegan bien ######################################################################################################
 if(!params.name || !params.nick || !params.email || !params.password) {//si no exitiera nombre o nick o email o password, devolver un estatus 400
     return res.status(400).send({
         status: "error",
@@ -18,7 +18,7 @@ if(!params.name || !params.nick || !params.email || !params.password) {//si no e
     });
 }
 
-    //3-validar los datos
+    //3-validar los datos ######################################################################################################
    try{
     validate(params);//params contiene datos del usuario enviados en la solicitud HTTP. 
    }catch(error){
@@ -28,7 +28,7 @@ if(!params.name || !params.nick || !params.email || !params.password) {//si no e
     });
    }
 
-        //4-controlar usuarios duplicados
+        //4-controlar usuarios duplicados ######################################################################################################
         //await espera a q se realice la consulta a la base de datos. 
         //User es el modelo de usuario
         //findOne es un método de Mongoose que busca UN solo documento en la base de datos que cumpla con los criterios
@@ -44,14 +44,14 @@ if(!params.name || !params.nick || !params.email || !params.password) {//si no e
         });
     }
 
-    // 5. Cifrar la contraseña
+    // 5. Cifrar la contraseña ######################################################################################################
     //bcrypt.hash devuelve una promesa, y await hace que JavaScript espere a que la contraseña se haya CIFRADO antes de asignar el resultado a hashedPassword.
     const hashedPassword = await bcrypt.hash(params.password, 10); // Usa libreria bcryptjs para cifrar la contraseña
    //hash: El método hash de bcrypt toma dos parámetros
           //params.password: contiene la contraseña del usuario que se ha recibido en la solicitud 
           //10 Es el número de veces que se aplica un proceso de hashing a la contraseña.
 
-    // 6. Crear el objeto del usuario
+    // 6. Crear el objeto del usuario ######################################################################################################
     const user = new User({// crea una nueva instancia del modelo User
          //El objeto user será un documento de base de datos que se guardará más tarde usando el método save() 
 
@@ -66,12 +66,12 @@ if(!params.name || !params.nick || !params.email || !params.password) {//si no e
         image:    params.image || "default.png", // Si no se proporciona una imagen, la imagen por DEFECTO será "default.png"
     });
 
-    // 7. Guardar el usuario en la base de datos
+    // 7. Guardar el usuario en la base de datos ######################################################################################################
     try {//try envuelve el código que puede generar un error, que si llega a ocurrir, pasara al bloque catch
         //await user.save(); // El método SAVE() de Mongoose guarda el nuevo documento (USER) en la base de datos.
         const userStored = await user.save(); //guarda, en userStored, el registro con todos los campos ya definidos en el objeto user en la base de datos.
 
-            //LIMPIAR el objeto a devolver
+            //8-LIMPIAR el objeto a devolver ######################################################################################################
             let userCreated = userStored.toObject();
             //userStored es el objeto que se guarda en la base de datos(este documento de Mongoose, tiene algunas propiedades adicionales)
             //.toObject() convierte este documento de Mongoose en un objeto JavaScript simple, es decir, elimina esos métodos internos y metadatos,
@@ -97,8 +97,19 @@ if(!params.name || !params.nick || !params.email || !params.password) {//si no e
         });
     }
 };
+   
+    //9-hacer LOGIN #################################################################################################################################
+    const login = (req, res)=>{
+        //1-recoger los parametros de la peticion
+        //2-comprobar q me llegan
+        //3-buscar en la BD si existe el email
+        //4-comprobar la CONTRASEÑA
+        //5-conseguir TOKEN JWT
+        //6-devolver datos usuario y TOKEN(crear 1 servicio q nos permita crear el TOKEN)
+        return res.status(200).send({
+            status: "succes",
+            message: "Metodo LOGIN"
+        });
+    }
 
-    //8-limpiar el objeto a devolver
-    //9-devolver el resultado
-
-module.exports = { register };
+module.exports = { register, login };
