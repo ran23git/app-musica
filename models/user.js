@@ -7,8 +7,8 @@ const UserSchema = Schema({
     surname: String,
     nick:       {  type: String,        required: true         },
     email:      {  type: String,        required: true         },
-    password:   {  type: String,        required: true         },
-    role:       {  type: String,        default: "role_user"   },
+    password:   {  type: String,        required: true,         select: false}, //select: false es pa q NO devuelva esta info NUNCA
+    role:       {  type: String,        default: "role_user",   select: false}, //select: false es pa q NO devuelva esta info NUNCA
     image:      {  type: String,        default: "default.png" },
     created_at: {  type: Date,          default: Date.now      }
 });

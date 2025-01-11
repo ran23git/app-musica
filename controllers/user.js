@@ -68,11 +68,26 @@ if(!params.name || !params.nick || !params.email || !params.password) {//si no e
 
     // 7. Guardar el usuario en la base de datos
     try {//try envuelve el código que puede generar un error, que si llega a ocurrir, pasara al bloque catch
-        await user.save(); // El método SAVE() de Mongoose guarda el nuevo documento (USER) en la base de datos.
+        //await user.save(); // El método SAVE() de Mongoose guarda el nuevo documento (USER) en la base de datos.
+        const userStored = await user.save(); //guarda, en userStored, el registro con todos los campos ya definidos en el objeto user en la base de datos.
+
+            //LIMPIAR el objeto a devolver
+            let userCreated = userStored.toObject();
+            //userStored es el objeto que se guarda en la base de datos(este documento de Mongoose, tiene algunas propiedades adicionales)
+            //.toObject() convierte este documento de Mongoose en un objeto JavaScript simple, es decir, elimina esos métodos internos y metadatos,
+            //  dejando solo las propiedades del documento que se guardaron en la base de datos (por ejemplo: name, email, role, etc.).
+            //toObject() te da una versión más simple del documento, sin los metadatos de Mongoose, para que puedas manipularlo o devolverlo en una respuesta.
+
+            //La palabra clave delete se usa para eliminar una propiedad de un objeto en JavaScript.
+//delete userCreated.password elimina la propiedad password del objeto userCreated que contiene todos los datos del usuario guardado.
+//En resumen: Está eliminando la contraseña del objeto antes de enviarlo en la respuesta. 
+            delete userCreated.password;
+            delete userCreated.role;
+
         return res.status(200).send({
             status: "success",
             message: "Usuario registrado correctamente",
-            user // Podrías devolver el objeto del usuario si es necesario
+            user: userCreated // Podrías devolver el objeto del usuario si es necesario
         });
     } catch (error) {//captura cualquier error que ocurra dentro del bloque try
         return res.status(500).send({
@@ -83,10 +98,7 @@ if(!params.name || !params.nick || !params.email || !params.password) {//si no e
     }
 };
 
-
     //8-limpiar el objeto a devolver
     //9-devolver el resultado
-
-   
 
 module.exports = { register };
