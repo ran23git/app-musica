@@ -169,10 +169,52 @@ if(!params.name || !params.nick || !params.email || !params.password) {//si no e
         }
     };
     
-    module.exports = { login };
+    
+
+
+
+
+// Conseguir los datos del perfil de UN usuario #####################################################################################################################
+const profile = async (req, res) => {
+    
+    //1-recoger ID usuario URL
+    const id= req.params.id;
+    //2-consulta apra sacar los datos del perfil
+    try {
+        // Consulta para obtener los datos del usuario, excluyendo password y role
+        const userProfile = await User.findById(id).select('-password -role').exec();
+
+        // Comprobar si se encontró el usuario---------------------------------------
+        if (!userProfile) {
+            return res.status(404).send({
+                status: "error",
+                message: "El usuario NO existe"
+            });
+        }
+
+           // Devolver el resultado
+        return res.status(200).send({
+            status: "success",
+            user: userProfile
+        });
+    } catch (error) {
+        return res.status(500).send({
+            status: "error",
+            message: "Error en el servidor",
+            error: error.message
+        });
+    }
+    //3-devolver el resultado
+    return res.status(200).send({
+        status: "succes",
+        message: "PRUEBA del perfil",
+        id
+    });
+}
+
     
     
     
     
 
-module.exports = { register, login };
+module.exports = { register, login, profile };

@@ -13,5 +13,7 @@ const { register } = require("../controllers/user");
 router.post("/register", UserController.register);//guarda info en backend
 router.post("/login",    UserController.login);   //Lee    info en backend
 
+router.get("/profile/:id",    UserController.profile);   //Lee    info en backend de UN usuario
+
 //exportar ROUTES
 module.exports = router;
