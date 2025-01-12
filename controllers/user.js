@@ -99,17 +99,78 @@ if(!params.name || !params.nick || !params.email || !params.password) {//si no e
 };
    
     //9-hacer LOGIN #################################################################################################################################
-    const login = (req, res)=>{
-        //1-recoger los parametros de la peticion
-        //2-comprobar q me llegan
-        //3-buscar en la BD si existe el email
-        //4-comprobar la CONTRASEÑA
-        //5-conseguir TOKEN JWT
-        //6-devolver datos usuario y TOKEN(crear 1 servicio q nos permita crear el TOKEN)
-        return res.status(200).send({
-            status: "succes",
-            message: "Metodo LOGIN"
-        });
-    }
+ 
+    const login = async (req, res) => {
+        // 1-recoger los parámetros de la petición
+        let params = req.body;
+    
+        // 2-comprobar que me llegan los datos correctamente
+        if (!params.email || !params.password) {
+            return res.status(400).send({
+                status: "error",
+                message: "FALTAN datos por enviar"
+            });
+        }
+    
+        try {
+            // 3-buscar en la base de datos si existe el email
+           // const user = await User.findOne({ email: params.email });
+              const user = await User.findOne({ email: params.email }).select('+password');
+//.select('+password') para sobrescribir el select: false del modelo y asegurarnos de que la contraseña se incluya en el resultado de la consulta.
+    
+            if (!user) {
+                return res.status(404).send({
+                    status: "error",
+                    message: "No existe el usuario"
+                });
+            }
+    
+            // Validar que la contraseña del usuario exista
+            if (!user.password) {
+                return res.status(500).send({
+                    status: "error",
+                    message: "La contraseña del usuario no está definida"
+                });
+            }
+    
+            // 4-comprobar la contraseña
+            const isPasswordValid = await bcrypt.compare(params.password, user.password);
+    
+            if (!isPasswordValid) {
+                return res.status(400).send({
+                    status: "error",
+                    message: "Contraseña incorrecta"
+                });
+            }
+    
+            // Aquí puedes añadir la lógica para generar un token JWT si es necesario
+            // Ejemplo de cómo generar un JWT:
+            // const token = jwt.sign({ id: user._id }, "mi_clave_secreta", { expiresIn: '1h' });
+    
+            // 5-devolver datos del usuario (sin la contraseña) y el token si es necesario
+            let userData = user.toObject();
+            delete userData.password; // Eliminar la contraseña de la respuesta
+    
+            return res.status(200).send({
+                status: "success",
+                message: "Login exitoso",
+                user: userData
+                // token: token // Descomentar si quieres devolver el token JWT
+            });
+        } catch (error) {
+            console.error(error);  // Agregar un log para ver el error exacto
+            return res.status(500).send({
+                status: "error",
+                message: "Error al iniciar sesión",
+                error: error.message
+            });
+        }
+    };
+    
+    module.exports = { login };
+    
+    
+    
+    
 
 module.exports = { register, login };
