@@ -2,7 +2,8 @@
 const validate = require("../helpers/validate");//importo la funcion para hacer validaciones
 const bcrypt = require("bcryptjs"); // librería para encriptar contraseñas,
 const User = require("../models/user"); // modelo de datos para interactuar con la base de datos
-
+//const jwt =  require("../helpers/jwt");//importo jwt para crear token
+const jwt = require("jsonwebtoken"); // Importa jsonwebtoken, no tu helper personalizado
 
 //1-REGISTRAR un usuario  ######################################################################################################
 //register realiza una petición HTTP para registrar un nuevo usuario. Recibe como parámetros req (la solicitud) y res (la respuesta).
@@ -143,9 +144,10 @@ if(!params.name || !params.nick || !params.email || !params.password) {//si no e
                 });
             }
     
+      //10-creacion de TOKEN #####################################################################################################################
             // Aquí puedes añadir la lógica para generar un token JWT si es necesario
             // Ejemplo de cómo generar un JWT:
-            // const token = jwt.sign({ id: user._id }, "mi_clave_secreta", { expiresIn: '1h' });
+             const token = jwt.sign({ id: user._id }, "mi_clave_secreta", { expiresIn: '1h' });
     
             // 5-devolver datos del usuario (sin la contraseña) y el token si es necesario
             let userData = user.toObject();
@@ -154,8 +156,8 @@ if(!params.name || !params.nick || !params.email || !params.password) {//si no e
             return res.status(200).send({
                 status: "success",
                 message: "Login exitoso",
-                user: userData
-                // token: token // Descomentar si quieres devolver el token JWT
+                user: userData,
+                 token: token // Descomentar si quieres devolver el token JWT
             });
         } catch (error) {
             console.error(error);  // Agregar un log para ver el error exacto
