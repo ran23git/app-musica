@@ -15,6 +15,7 @@ router.post("/register",                 UserController.register);  //guarda inf
 router.post("/login",                    UserController.login);     //Lee    info en backend
 
 router.get("/profile/:id", check.auth,   UserController.profile);   //Lee    info en backend de UN usuario
+router.put("/update", check.auth,   UserController.update); 
 
 //exportar ROUTES
 module.exports = router;

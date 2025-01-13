@@ -25,7 +25,8 @@ const createToken = (user) => { //recibe los datos(id,nmbre, etc) de 1 usuario (
     };    
 
     return jwt.encode(payload, secret); //devolver JWT TOKEN codificado
-}
+    //return jwt.sign(payload, secret, { expiresIn: '30d' });
+};
 
 //4-exportar modulo
 module.exports = {  createToken,  secret };

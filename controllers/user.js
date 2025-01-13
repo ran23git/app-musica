@@ -4,6 +4,8 @@ const bcrypt = require("bcryptjs"); // librería para encriptar contraseñas,
 const User = require("../models/user"); // modelo de datos para interactuar con la base de datos
 //const jwt =  require("../helpers/jwt");//importo jwt para crear token
 const jwt = require("jsonwebtoken"); // Importa jsonwebtoken, no tu helper personalizado
+const argon2 = require("argon2");
+
 
 //1-REGISTRAR un usuario  ######################################################################################################
 //register realiza una petición HTTP para registrar un nuevo usuario. Recibe como parámetros req (la solicitud) y res (la respuesta).
@@ -143,12 +145,17 @@ if(!params.name || !params.nick || !params.email || !params.password) {//si no e
                     message: "Contraseña incorrecta"
                 });
             }
-    
+
+     //10-creacion de TOKEN #####################################################################################################################
+            const jwt = require("jsonwebtoken");
+            const libjwt = require("../helpers/jwt");
+            const secret = libjwt.secret;
       //10-creacion de TOKEN #####################################################################################################################
             // Aquí puedes añadir la lógica para generar un token JWT si es necesario
             // Ejemplo de cómo generar un JWT:
-             const token = jwt.sign({ id: user._id }, "mi_clave_secreta", { expiresIn: '1h' });
-    
+             //const token = jwt.sign({ id: user._id }, "mi_clave_secreta", { expiresIn: '1h' });
+             const token = jwt.sign({ id: user._id }, secret, { expiresIn: '1h' });
+
             // 5-devolver datos del usuario (sin la contraseña) y el token si es necesario
             let userData = user.toObject();
             delete userData.password; // Eliminar la contraseña de la respuesta
@@ -214,8 +221,114 @@ const profile = async (req, res) => {
 
     
     // MIDDLEWARE auth #####################################################################################################################
+    // MIDDLEWARE auth #####################################################################################################################
 
-    
-    
 
-module.exports = { register, login, profile };
+// Método de ACTUALIZAR usuario #####################################################################################################################
+const update = async (req, res) => {
+    const userIdentity = req.user; // Recoger la IDENTIDAD del usuario a actualizar (ID, etc)
+    let   userToUpdate = req.body;   // Registra lo que me llega del usuario
+
+    // Eliminar propiedades no necesarias
+    delete userToUpdate.iat;
+    delete userToUpdate.exp;
+    delete userToUpdate.role;
+    delete userToUpdate.image;
+
+    // Validar que el email existe en userToUpdate
+    if (userToUpdate.email) {
+        userToUpdate.email = userToUpdate.email.toLowerCase(); //typeof userToUpdate.email === 'string': se asegura de que el valor de email sea de tipo string
+    } else {   //Si la condición anterior se cumple, el email se convierte a minúsculas utilizando el método toLowerCase().
+        return res.status(400).json({
+            status: "error",
+            message: "El email es requerido"
+        });
+    }
+
+    // 3° Controlar y buscar usuarios duplicados-----------------------------------------------------------
+    try {
+        const existingUser = await User.findOne({ //existingUser que almacenará el resultado de la consulta a la base de datos
+            $or: [   //await: Indica que la operación es asíncrona. Se espera que la promesa devuelta por
+                //$or: al menos una de las condiciones dentro de la matriz debe ser verdadera.
+                //User.findOne se resuelva antes de continuar. Esto significa que el código siguiente no se ejecutará hasta que se obtenga el resultado de la búsqueda.  
+                //User.findOne: Este es un método de un modelo de Mongoose que busca un único documento en la colección User
+
+                { email: userToUpdate.email },  // se busca un usuario cuyo email coincida con userToUpdate.email. 
+                //Esto significa que se está buscando un usuario que tenga el mismo correo electrónico que el que se está tratando de actualizar.
+
+                { nick: userToUpdate.nick ? userToUpdate.nick.toLowerCase() : null } //Aquí se busca un usuario cuyo nick coincida con userToUpdate.nick, 
+                //pero antes de buscar, se convierte userToUpdate.nick a minúsculas utilizando toLowerCase(). 
+                //Esto es útil para asegurar que la comparación sea insensible a mayúsculas y minúsculas
+
+            ]
+        });
+        //Comprobar el Nick y el mail que si es el mismo, me permita actualizarlo, asi no sale mensaje de “usuario ya existe”-------------------------
+        let userIsset = false; //Aquí se declara una variable llamada userIsset y se inicializa con el valor false. Esta variable podría usarse más adelante en el 
+        //código para indicar si un usuario con las características especificadas ya existe en la base de datos (es decir, si existingUser contiene un documento).
+        //si existingUser existe (no es null o undefined) y si su identificador (_id) es diferente de userIdentity.id.
+        //existingUser: se refiere al usuario que se encontró previamente en la base de datos.
+
+
+        if (existingUser && existingUser._id != userIdentity.id) {  //se asegura de que el _id del usuario encontrado no sea el mismo que el id del usuario que se está intentando actualizar.
+            userIsset = true; //Si la condición anterior es verdadera, se establece la variable userIsset a true. Esto indica que se encontró un usuario existente con el mismo email o nick, 
+            //y que no es el mismo usuario que está realizando la actualización
+
+        }
+
+        if (userIsset) {  //se evalúa si userIsset es true. Si es así, significa que se encontró un usuario existente con el mismo email o nick que no es el usuario actual.
+            return res.status(400).json({
+                status: "error",
+                message: "El usuario ya existe"
+            });
+        }
+
+        // 4° Cifrar la contraseña****************************************************************************************
+                    // Actualizar la contraseña si se ha proporcionado
+        if (userToUpdate.password) { //si es verdadera la contraseña de ESE usuario, cifro la contraseña
+            //Esto significa que solo se procederá a actualizar la contraseña si se ha proporcionado un nuevo valor para ella
+
+            userToUpdate.password = await argon2.hash(userToUpdate.password); //Hashing de la contraseña: Si la condición anterior 
+            //es verdadera, se utiliza el módulo argon2 para hashear la nueva contraseña. El método hash toma la contraseña en 
+            //texto plano y la convierte en un formato seguro (hash), que es lo que se almacenará en la base de datos
+
+        }
+
+        // BUSCAR  y ACTUALIZAR**********
+                    //la constante userUpdated que ALMACENARÁ el resultado de la operación de ACTIALIZACIÓN-------------------------------------
+        const userUpdated = await User.findByIdAndUpdate(userIdentity.id, userToUpdate, { new: true });
+           //User.findByIdAndUpdate: Este método busca un usuario en la base de datos por su ID (en este caso, userIdentity.id)
+                                                                                // y lo ACTUALIZA con los datos de userToUpdate.
+            //{ new: true }: Esta opción le dice a Mongoose que devuelva el documento actualizado en lugar del original. 
+                                                //Así, userUpdated contendrá los datos del usuario después de la actualización.
+
+        if (!userUpdated) {
+            return res.status(404).json({
+                status: "error",
+                message: "No se pudo actualizar el usuario"
+            });
+        }
+
+            //contiene la información del usuario después de la actualización
+        return res.status(200).json({
+            status: "success",
+            message: "Usuario actualizado correctamente",
+            user: userUpdated
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            status: "error",
+            message: "Error al actualizar el usuario",
+            error: error.message
+        });
+    }
+};
+// Método de ACTUALIZAR usuario #####################################################################################################################
+
+        
+// const update = async (req, res) => {
+//          const userIdentity = req.user; // Recoger la IDENTIDAD del usuario a actualizar (ID, etc)
+//          let   userToUpdate = req.body; 
+//     console.log(userIdentity, userToUpdate);
+// }
+module.exports = { register, login, profile, update };
