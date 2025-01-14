@@ -34,6 +34,7 @@ router.get("/profile/:id", check.auth,   UserController.profile);   //Lee       
 router.put("/update", check.auth,   UserController.update);         //Actualiza info usuario
 //router.get("/avatar/:file", check.auth,   UserController.avatar); 
 router.post("/upload/", [check.auth, uploads.single("file0")],   UserController.upload);  //sube imagen
+router.get("/avatar/:file",  UserController.avatar);   //Lee       info en backend de UN usuario
 
 //exportar ROUTES
 module.exports = router;
