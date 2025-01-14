@@ -323,12 +323,32 @@ const update = async (req, res) => {
         });
     }
 };
-// Método de ACTUALIZAR usuario #####################################################################################################################
 
-        
-// const update = async (req, res) => {
-//          const userIdentity = req.user; // Recoger la IDENTIDAD del usuario a actualizar (ID, etc)
-//          let   userToUpdate = req.body; 
-//     console.log(userIdentity, userToUpdate);
-// }
-module.exports = { register, login, profile, update };
+
+
+
+
+
+
+
+// Método de RUTA y SUBIR avatar #####################################################################################################################
+
+const upload = (req, res) => {
+    //1-configuracion de subida(MULTER)
+    //2-recoger el fichro de imagen y comprobar si existe
+    //3-conseguir el nombre del archivo
+    //4-tomar info de la imagen
+    //5-comprobar si la extension es valida
+    //6-si es corecto, guardar la imagen en la base de datos
+
+    //7-devolver una RESPUESTA
+    return res.status(200).json({
+        status: "success",
+        message: "metodo SUBIR IMAGENES",
+        file: req.file
+    });
+}
+
+
+
+module.exports = { register, login, profile, update, upload };
