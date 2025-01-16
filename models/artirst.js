@@ -5,6 +5,7 @@ const { default: isEmail } = require("validator/lib/isEmail");
 const ArtistSchema = Schema({
     name:       {  type: String,        required: true         },    
     image:      {  type: String,        default: "default.png" },
+    description:{  type: String,        required: true         },  
     created_at: {  type: Date,          default: Date.now      }
 });
 

@@ -18,7 +18,8 @@ const ArtistController = require("../controllers/artists");//y ya tengo acceso a
 //definir RUTAS
 //router.get("/prueba", ArtistController.prueba); //ArtistController.prueba está accediendo a la función prueba definida en controllers/artists.js.
 console.log("Cargando rutas de artistas...");  // Agrega este log para verificar
-router.post("/save", ArtistController.save);
+router.post("/save", ArtistController.save);  //grabar artista
+router.get("/one/:id", check.auth, ArtistController.one); //obtener artista
 
 //exportar ROUTES
 module.exports = router;
