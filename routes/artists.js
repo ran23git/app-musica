@@ -21,6 +21,7 @@ console.log("Cargando rutas de artistas...");  // Agrega este log para verificar
 router.post("/save", ArtistController.save);  //grabar artista
 router.get("/one/:id", check.auth, ArtistController.one); //obtener artista
 router.get("/list/:page?", check.auth, ArtistController.list); //listados de artistas
+router.put("/update/:id", check.auth, ArtistController.update);  //editar artista
 
 //exportar ROUTES
 module.exports = router;

@@ -1,5 +1,5 @@
 const Artist = require("../models/artirst"); // Nota que corrigí el nombre de 'artirst' a 'artist'
-
+const mongoosePagination = require("mongoose-pagination");
 
 
 //GUARDAR un artista-----------------------------------------------------------------------------------
@@ -66,7 +66,7 @@ const one = async (req, res) => {
 
 
 
-// LISTADO de artistas con paginación-----------------------------------------------------------------------------------
+// LISTADO de artistas con PAGINACION-----------------------------------------------------------------------------------
 const list = async (req, res) => {
     try {
         // Obtener el número de la página desde los parámetros de la URL
@@ -78,17 +78,25 @@ const list = async (req, res) => {
         // Definir los saltos y límites para la paginación
         const skip = (page - 1) * itemsPerPage;
 
+        // Obtener el número total de artistas
+        const totalArtists = await Artist.countDocuments();
+
+        // Calcular el número total de páginas
+        const totalPages = Math.ceil(totalArtists / itemsPerPage);
+
         // Buscar los artistas con paginación
         const artists = await Artist.find()
             .skip(skip) // Salto de registros
             .limit(itemsPerPage) // Límite de registros por página
-            .sort("name") //ordena por campo name de la A a la Z
-            .exec(); // Ejecutar la consulta
+            .sort("name"); //ordena por campo name de la A a la Z
+            //.exec(); // Ejecutar la consulta
 
         return res.status(200).send({
             status: "success",
             message: "Listado de artistas",
             page,
+            itemsPerPage,
+            totalPages,
             artists
         });
     } catch (error) {
@@ -100,4 +108,41 @@ const list = async (req, res) => {
     }
 };
 
-module.exports = { save, one, list };
+// EDITAR / ACTUALIZAR artista
+const update = async (req, res) => {
+    try {
+        // Recoger el ID del artista desde la URL
+        const id = req.params.id;
+
+        // Recoger los datos del body
+        const data = req.body;
+
+        // Buscar y actualizar el artista
+        const artistUpdated = await Artist.findByIdAndUpdate(id, data, { new: true });
+
+        // Si no se encuentra el artista o ocurre un error
+        if (!artistUpdated) {
+            return res.status(404).send({
+                status: "error",
+                message: "No se encontró el artista para actualizar"
+            });
+        }
+
+        // Responder con éxito
+        return res.status(200).send({
+            status: "success",
+            message: "El artista ha sido actualizado",
+            artist: artistUpdated
+        });
+    } catch (error) {
+        // Manejo de errores
+        return res.status(500).send({
+            status: "error",
+            message: "Error al actualizar el artista",
+            error: error.message
+        });
+    }
+};
+
+
+module.exports = { save, one, list, update };
