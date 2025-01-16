@@ -20,6 +20,7 @@ const ArtistController = require("../controllers/artists");//y ya tengo acceso a
 console.log("Cargando rutas de artistas...");  // Agrega este log para verificar
 router.post("/save", ArtistController.save);  //grabar artista
 router.get("/one/:id", check.auth, ArtistController.one); //obtener artista
+router.get("/list/:page?", check.auth, ArtistController.list); //listados de artistas
 
 //exportar ROUTES
 module.exports = router;

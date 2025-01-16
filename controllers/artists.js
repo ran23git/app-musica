@@ -30,32 +30,6 @@ const save = async (req, res) => {
     }
 };
 
-//OBTENER un artista-----------------------------------------------------------------------------------
-
-// const one = (req, res)=> {
-// //obtener 1 parametro por url
-// const artistId = req.params.id;
-
-// //FIND
-// Artist.findById(artistId, (error, artist)=> {
-//     if (error || !artist) {
-//         return res.status(404).send({
-//             status: "error",
-//             message: "NO existe el ARTISTA"
-//         });
-//     }
-
-//     return res.status(200).send({
-//         status: "succes",
-//         message: "accion de OBTENER 1 usuario",
-//         artist
-//     });
-    
-// })
-  
-// }
-
-
 // OBTENER un artista -----------------------------------------------------------------------------------
 // Función actualizada para usar async/await correctamente
 const one = async (req, res) => {
@@ -90,4 +64,40 @@ const one = async (req, res) => {
     }
 };
 
-module.exports = { save, one };
+
+
+// LISTADO de artistas con paginación-----------------------------------------------------------------------------------
+const list = async (req, res) => {
+    try {
+        // Obtener el número de la página desde los parámetros de la URL
+        let page = parseInt(req.params.page) || 1;
+
+        // Definir el número de elementos por página
+        const itemsPerPage = 5;
+
+        // Definir los saltos y límites para la paginación
+        const skip = (page - 1) * itemsPerPage;
+
+        // Buscar los artistas con paginación
+        const artists = await Artist.find()
+            .skip(skip) // Salto de registros
+            .limit(itemsPerPage) // Límite de registros por página
+            .sort("name") //ordena por campo name de la A a la Z
+            .exec(); // Ejecutar la consulta
+
+        return res.status(200).send({
+            status: "success",
+            message: "Listado de artistas",
+            page,
+            artists
+        });
+    } catch (error) {
+        return res.status(500).send({
+            status: "error",
+            message: "Error al obtener los artistas",
+            error: error.message
+        });
+    }
+};
+
+module.exports = { save, one, list };
