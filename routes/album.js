@@ -13,6 +13,7 @@ const { prueba } = require("../controllers/album");
 //definir RUTAS
 router.get("/prueba", AlbumController.prueba)
 router.post("/save", check.auth, AlbumController.save);  //grabar album
+router.get("/one/:id", check.auth, AlbumController.one);  //recuperar 1 album
 
 //exportar ROUTES
 module.exports = router;

@@ -8,6 +8,8 @@ const prueba = (req, res) => {
     });
 }
 
+
+//CREAR ALBUMES###########################################################################
 const save = async (req, res) => {
     try {
                 let params = req.body;// Tomar los datos del BODY
@@ -38,5 +40,39 @@ const save = async (req, res) => {
     }
 };
 
-module.exports = { prueba, save };
+
+//MOSTRAR ALBUMES y obtener info del ARTISTA ###########################################################################
+const one = async (req, res) => {
+    try {
+        // Obtener el ID del álbum desde los parámetros de la URL
+        const albumId = req.params.id;
+
+        // Buscar el álbum por su ID y hacer el populate del artista
+        const album = await Album.findById(albumId).populate("artist");  // Usamos async/await aquí
+
+        if (!album) {
+            return res.status(404).send({
+                status: "error",
+                message: "No se ha encontrado el ALBUM"
+            });
+        }
+
+        // Responder con el álbum encontrado
+        return res.status(200).send({
+            status: "success",
+            album
+        });
+        
+    } catch (error) {
+        // Manejo de errores en caso de que ocurra algo inesperado
+        return res.status(500).send({
+            status: "error",
+            message: "Error al obtener el álbum",
+            error: error.message
+        });
+    }
+};
+
+
+module.exports = { prueba, save, one };
 
