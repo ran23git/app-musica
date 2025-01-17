@@ -1,4 +1,7 @@
 const Artist = require("../models/artirst"); // Nota que corrigí el nombre de 'artirst' a 'artist'
+const Album = require("../models/album"); 
+const Song = require("../models/song");  // Ajusta la ruta si es necesario
+
 const mongoosePagination = require("mongoose-pagination");
 const path = require('path');
 const fs = require('fs');
@@ -149,13 +152,13 @@ const update = async (req, res) => {
 
 
 
-//ELIMINAR artista-----------------------------------------------------------
+//ELIMINAR artista el ALBU, y las CANCIONES #####################################################################################################################
 const remove = async (req, res) => {
     try {
         // Obtener el id del artista de la URL
         const id = req.params.id;
 
-        // Buscar y eliminar el artista con el ID proporcionado
+        // Buscar el artista
         const artistDeleted = await Artist.findByIdAndDelete(id);
 
         // Si no se encuentra el artista con ese ID
@@ -166,11 +169,25 @@ const remove = async (req, res) => {
             });
         }
 
+        // Buscar todos los álbumes del artista
+        const albums = await Album.find({ artist: id });
+
+        // Eliminar todos los álbumes del artista
+        const albumsDeleted = await Album.deleteMany({ artist: id });
+
+        // Obtener los IDs de los álbumes eliminados
+        const albumIds = albums.map(album => album._id);
+
+        // Eliminar todas las canciones asociadas a esos álbumes
+        const songsDeleted = await Song.deleteMany({ album: { $in: albumIds } });
+
         // Devolver una respuesta exitosa
         return res.status(200).send({
             status: "success",
             message: "El artista ha sido eliminado",
-            artist: artistDeleted
+            artist: artistDeleted,
+            albumsDeleted, // Muestra los álbumes eliminados
+            songsDeleted   // Muestra las canciones eliminadas
         });
     } catch (error) {
         // Manejo de errores
@@ -181,6 +198,10 @@ const remove = async (req, res) => {
         });
     }
 };
+
+
+
+
 
 
 // Método de RUTA y SUBIR avatar #####################################################################################################################
