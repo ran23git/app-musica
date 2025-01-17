@@ -1,5 +1,7 @@
 const Artist = require("../models/artirst"); // Nota que corrigí el nombre de 'artirst' a 'artist'
 const mongoosePagination = require("mongoose-pagination");
+const path = require('path');
+const fs = require('fs');
 
 
 //GUARDAR un artista-----------------------------------------------------------------------------------
@@ -181,5 +183,129 @@ const remove = async (req, res) => {
 };
 
 
-module.exports = { save, one, list, update, remove };
+// Método de RUTA y SUBIR avatar #####################################################################################################################
+
+const upload = async (req, res) => {
+    //1-configuracion de subida(MULTER)---------------------------------------------------
+    //2-recoger el fichro de imagen y comprobar si existe----------------------------------
+   let artistId = req.params.id;
+   
+    try {
+        if (!req.file) {
+            return res.status(404).send({
+                status: "error",
+                message: "La peticion NO incluye la IMAGEN"
+            });
+        }
+        //3-conseguir el nombre del archivo------------------------------------------------------
+        // Conseguir el NOMBRE del archivo
+        let image = req.file.originalname; //Guarda el nombre original del archivo subido en la variable image.
+        // (filename es el campo q tiene el NUEVO nombre )
+
+        //4-tomar info de la imagen---------------------------------------------------------------
+        // Conseguir la EXTENSION del archivo
+        const imageSplit = image.split("."); //Divide el nombre del archivo en partes usando el punto (.) como separador, 
+        //creando un array que contiene el nombre y la extensión.
+
+        const extension = imageSplit[imageSplit.length - 1].toLowerCase(); // Obtener la extensión en minúsculas
+        //Obtiene la última parte del array (la extensión) y la convierte a minúsculas.
+
+        //5-Comprobar que la EXTENSION es correcta--------------------------------------------------
+        const validExtensions = ["png", "jpg", "jpeg", "gif"]; //Define un array con las extensiones de archivo válidas que se permiten.
+
+        if (!validExtensions.includes(extension)) {
+            // si la extensión del archivo no está en la lista de extensiones válidas, se ejecuta el bloque dentro del if.
+
+            // Borra archivo subido porque tiene extensión incorrecta
+            const filePath = req.file.path; //Guarda la ruta del archivo subido en la variable filePath
+            
+            fs.unlinkSync(filePath); //Usa el módulo fs para eliminar el archivo del sistema de archivos de manera sincrónica, xq la extensión no es válida.
+
+            // Devuelve una respuesta negativa
+            return res.status(400).send({
+                status: "error",
+                message: "EXTENSION del archivo INVALIDA."
+            });
+        }
+        //6-Si la extensión es correcta, GUARDAR en la BASE de DATOS*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+        const artistUpdated = await Artist.findOneAndUpdate( //usca un usuario en la base de datos por su ID y actualiza su campo image con el 
+            //nombre del archivo subido. La operación es asíncrona y espera el resultado.
+
+            { _id: artistId }, // Se busca un usuario cuyo _id coincide con el ID del usuario de la solicitud.
+            { image: req.file.filename }, //Especifica que se quiere actualizar el campo image con el nombre del archivo subido (req.file.filename).
+            { new: true }  // indica que se debe devolver el documento actualizado.
+        );
+
+        if (!artistUpdated) {  //Si no se encontró un usuario o hubo un error, se ejecuta el bloque dentro del if.
+            return res.status(500).send({
+                status: "error",
+                message: "Error en la SUBIDA del avatar"
+            });
+        }
+        //7-devolver una RESPUESTA---------------------------------------------------------------------------
+        return res.status(200).send({
+            status: "success",
+            artist: artistUpdated,
+            file: req.file
+        });
+
+    } catch (error) { //Captura cualquier error que ocurra dentro del bloque try.
+        return res.status(500).send({
+            status: "error",
+            message: "Se produjo un error en el servidor."
+        });
+    }
+
+
+
+
+
+    // return res.status(200).json({
+    //     status: "success",
+    //     message: "metodo SUBIR IMAGENES",
+    //     file: req.file
+    // });
+}
+
+
+
+
+//SACAR el AVATAR y mostrarlo en el ENDPOINT#####################################################################################################################
+
+    // Si fs ya está importado en otra parte del archivo, no lo vuelvas a declarar
+    const image = (req, res) => {   //se define una función llamada avatar, que recibe dos parámetros: req (la solicitud) y 
+        //res (la respuesta). Esta función se usará como un controlador en un servidor.
+        // 1° Sacar el PARAMETRO de la url--------------
+        const file = req.params.file; //Se extrae el parámetro file de la URL de la solicitud. Este parámetro se espera 
+        //que contenga el nombre del archivo que se quiere acceder.
+
+        // 2° Montar el PATH real de la imagen----------------
+        //const filePath = path.join(__dirname, 'uploads', 'avatars', file); //Se construye la ruta completa hacia el archivo de imagen. path.join combina
+        // el directorio actual (__dirname) con las carpetas uploads y avatars, y el nombre del archivo, creando una ruta absoluta.
+       // const filePath = "./uploads/avatars/" + file;
+        const filePath = path.join(__dirname, '..', 'uploads', 'artists', file);
+        //funciono con el path ultimo
+
+        // 3° Comprobar que el archivo EXISTE------------------
+        fs.stat(filePath, (error) => { //Se utiliza fs.stat para verificar si el archivo en la ruta filePath existe. Si hay un 
+            //error (por ejemplo, si el archivo no se encuentra), se ejecuta la función de callback.
+
+            if (error) { //Si hay un error, se devuelve una respuesta con el estado HTTP 404 (No encontrado)
+                return res.status(404).send({
+                    status: "error",
+                    message: "NO EXISTE la imagen",
+                    filePath, //muestra el path con el nombre del archivo
+                    file,     //muestra el nombre del archivo
+                    __dirname //muestra el path
+                });
+            }
+
+            // 4° Si SI existe, devolver un FILE---------------
+            //Si el archivo existe, se envía como respuesta al cliente usando res.sendFile, que envía el archivo como una respuesta HTTP.
+            return res.sendFile(filePath);
+        });
+    };
+
+
+module.exports = { save, one, list, update, remove, upload, image };
  

@@ -15,6 +15,22 @@ const ArtistController = require("../controllers/artists");//y ya tengo acceso a
 //const { prueba }       = require("../controllers/artists");//Desestructuración para importar SOLO y específicamente la función prueba del controlador de ARTISTAS
 //es decir, De todo lo que se exporta en /controllers/artists.js, solo quiero la función prueba".
 
+//####################################################################################
+        //A-configuracion de subida del metodo disskStorage (MULTER)
+        const multer = require("multer"); //permite subir archivos al servidor
+        const storage = multer.diskStorage({//storage es donde se guardaran los archivos
+            destination: (req, file,cb) => {
+                    cb (null, "./uploads/artists/") //destination indica a multer DONDE se guardaran las imagenes
+            },
+
+            filename: (req, file,cb) => {//filename dice cual sera el NOMBRE de cada 1 de mis archivos
+                cb (null, "artist-."+Date.now()+"-"+file.originalname) 
+            }
+        })
+        //B- ahora APLICO esa configuracion al MULTER creando el MIDDLEWARE uploads
+        const uploads = multer({storage});
+//####################################################################################
+
 //definir RUTAS
 //router.get("/prueba", ArtistController.prueba); //ArtistController.prueba está accediendo a la función prueba definida en controllers/artists.js.
 console.log("Cargando rutas de artistas...");  // Agrega este log para verificar
@@ -23,7 +39,8 @@ router.get("/one/:id", check.auth, ArtistController.one); //obtener artista
 router.get("/list/:page?", check.auth, ArtistController.list); //listados de artistas
 router.put("/update/:id", check.auth, ArtistController.update);  //editar artista
 router.delete("/remove/:id", check.auth, ArtistController.remove);  //borrar artista
-
+router.post("/upload/:id", [check.auth, uploads.single("file0")],   ArtistController.upload);  //sube imagen
+router.get("/image/:file",  ArtistController.image);   //Lee       info en backend de UN usuario
 //exportar ROUTES
 module.exports = router;
 
