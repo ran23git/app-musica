@@ -108,7 +108,7 @@ const list = async (req, res) => {
     }
 };
 
-// EDITAR / ACTUALIZAR artista
+// EDITAR / ACTUALIZAR artista-----------------------------------------
 const update = async (req, res) => {
     try {
         // Recoger el ID del artista desde la URL
@@ -145,4 +145,41 @@ const update = async (req, res) => {
 };
 
 
-module.exports = { save, one, list, update };
+
+
+//ELIMINAR artista-----------------------------------------------------------
+const remove = async (req, res) => {
+    try {
+        // Obtener el id del artista de la URL
+        const id = req.params.id;
+
+        // Buscar y eliminar el artista con el ID proporcionado
+        const artistDeleted = await Artist.findByIdAndDelete(id);
+
+        // Si no se encuentra el artista con ese ID
+        if (!artistDeleted) {
+            return res.status(404).send({
+                status: "error",
+                message: "No se encontró el artista con el ID proporcionado"
+            });
+        }
+
+        // Devolver una respuesta exitosa
+        return res.status(200).send({
+            status: "success",
+            message: "El artista ha sido eliminado",
+            artist: artistDeleted
+        });
+    } catch (error) {
+        // Manejo de errores
+        return res.status(500).send({
+            status: "error",
+            message: "Error al eliminar el artista",
+            error: error.message
+        });
+    }
+};
+
+
+module.exports = { save, one, list, update, remove };
+ 

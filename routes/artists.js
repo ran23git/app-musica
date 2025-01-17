@@ -22,6 +22,7 @@ router.post("/save", ArtistController.save);  //grabar artista
 router.get("/one/:id", check.auth, ArtistController.one); //obtener artista
 router.get("/list/:page?", check.auth, ArtistController.list); //listados de artistas
 router.put("/update/:id", check.auth, ArtistController.update);  //editar artista
+router.delete("/remove/:id", check.auth, ArtistController.remove);  //borrar artista
 
 //exportar ROUTES
 module.exports = router;
