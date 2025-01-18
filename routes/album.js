@@ -14,6 +14,7 @@ const { prueba } = require("../controllers/album");
 router.get("/prueba", AlbumController.prueba)
 router.post("/save", check.auth, AlbumController.save);  //grabar album
 router.get("/one/:id", check.auth, AlbumController.one);  //recuperar 1 album
+router.get("/list/:artistId", check.auth, AlbumController.list);  //recuperar TODOS los albums
 
 //exportar ROUTES
 module.exports = router;

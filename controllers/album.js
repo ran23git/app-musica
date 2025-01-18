@@ -74,5 +74,47 @@ const one = async (req, res) => {
 };
 
 
-module.exports = { prueba, save, one };
+// MOSTRAR todos los ALBUMES de 1 ARTISTA ###########################################################################
+const list = async (req, res) => {
+    try {
+        // Obtener el id del artista de la URL
+        const artistId = req.params.artistId;
+
+        // Verificar si el id del artista existe
+        if (!artistId) {
+            return res.status(404).send({
+                status: "error",
+                message: "NO se ha encontrado el ARTISTA"
+            });
+        }
+
+        // Obtener todos los álbumes de la BBDD de un artista en concreto
+        const albums = await Album.find({ artist: artistId }).populate("artist");
+
+        // Si no se encuentran álbumes
+        if (!albums || albums.length === 0) {
+            return res.status(404).send({
+                status: "error",
+                message: "NO se han encontrado ALBUMS"
+            });
+        }
+
+        // Devolver los resultados
+        return res.status(200).send({
+            status: "success",
+            albums
+        });
+
+    } catch (error) {
+        // Manejar cualquier error que ocurra durante la ejecución
+        return res.status(500).send({
+            status: "error",
+            message: "Hubo un error al obtener los álbumes",
+            error: error.message
+        });
+    }
+};
+
+module.exports = { prueba, save, one, list };
+
 
