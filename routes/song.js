@@ -14,7 +14,7 @@ const { prueba } = require("../controllers/song");
  
 //definir RUTAS
 router.get("/prueba", SongController.prueba)
-router.post("/save", check.auth, SongController.save);
+router.post("/save", check.auth, SongController.save);  
 
 
 //exportar ROUTES
