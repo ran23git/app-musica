@@ -115,6 +115,46 @@ const list = async (req, res) => {
     }
 };
 
-module.exports = { prueba, save, one, list };
+
+// ACTUALIZAR 1 album ###########################################################################
+const update = async (req, res) => {
+    try {
+        // Obtener parámetros de la URL
+        const albumId = req.params.albumId;
+
+        // Obtener el body (los datos a actualizar)
+        const data = req.body;
+        
+        // Usar el modelo de Album para buscar y actualizar el álbum
+        const albumUpdated = await Album.findByIdAndUpdate(albumId, data, { new: true });
+
+        // Si no se encontró el álbum
+        if (!albumUpdated) {
+            return res.status(404).send({
+                status: "error",
+                message: "No se encontró el álbum"
+            });
+        }
+
+        // Si se actualizó correctamente
+        return res.status(200).send({
+            status: "success",
+            message: "Método ACTUALIZAR album",
+            albumId,
+            albumUpdated
+        });
+
+    } catch (error) {
+        // Manejo de errores en caso de fallar la operación
+        return res.status(500).send({
+            status: "error",
+            message: "Error al actualizar el álbum",
+            error: error.message
+        });
+    }
+}
+
+
+module.exports = { prueba, save, one, list, update };
 
 
