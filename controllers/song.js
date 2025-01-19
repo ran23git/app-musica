@@ -1,5 +1,14 @@
 const Song = require("../models/song");
+<<<<<<< HEAD
 const mongoose = require('mongoose');
+=======
+const multer = require("multer");
+const path = require('path');
+const fs = require('fs');
+const upload = require("../config/multerConfig"); // Correcto
+
+
+>>>>>>> e06abdaa1da064075d6ad77fa056473ae7f0bbf6
 
 const prueba = (req, res) => {
     return res.status(200).send({
@@ -148,6 +157,7 @@ const update = async (req, res) => {
     }
 };
 
+<<<<<<< HEAD
 // BORRRADO de canciones ############################################
 // const remove = async (req, res) => {
 //     try {
@@ -193,13 +203,29 @@ const remove = async (req, res) => {
         }
 
         // Eliminación de la canción
+=======
+
+// BORRADO de  canciones ############################################
+const remove = async (req, res) => {
+    try {
+        // parámetro url id de canción
+        let songId = req.params.id;
+
+        // eliminación usando async/await con findByIdAndDelete
+>>>>>>> e06abdaa1da064075d6ad77fa056473ae7f0bbf6
         const songRemoved = await Song.findByIdAndDelete(songId);
 
         // Si no se encontró o no se eliminó la canción
         if (!songRemoved) {
+<<<<<<< HEAD
             return res.status(404).send({
                 status: "error",
                 message: "No se encontró la canción con ese ID"
+=======
+            return res.status(500).send({
+                status: "error",
+                message: "NO se ha borrado la canción"
+>>>>>>> e06abdaa1da064075d6ad77fa056473ae7f0bbf6
             });
         }
 
@@ -208,15 +234,114 @@ const remove = async (req, res) => {
             status: "success",
             song: songRemoved
         });
+<<<<<<< HEAD
     } catch (error) {
         // Manejo de errores
         console.error(error);  // Imprime detalles del error en la consola
         return res.status(500).send({
             status: "error",
             message: "Hubo un ERROR al intentar BORRAR la canción"
+=======
+
+    } catch (error) {
+        // Manejo de errores
+        return res.status(500).send({
+            status: "error",
+            message: "Hubo un error al intentar borrar la canción",
+            error: error.message
+>>>>>>> e06abdaa1da064075d6ad77fa056473ae7f0bbf6
         });
     }
 };
 
 
+<<<<<<< HEAD
 module.exports = {prueba, save, one, list, update, remove}
+=======
+
+
+
+
+
+
+// Método de RUTA y SUBIR avatar #####################################################################################################################
+
+
+
+// Método para subir una canción
+const uploadSong = async (req, res) => {
+    let songId = req.params.id;
+
+    try {
+        if (!req.file) {
+            return res.status(404).send({
+                status: "error",
+                message: "La petición NO incluye la canción"
+            });
+        }
+
+        let song = req.file.originalname;
+        const songSplit = song.split(".");
+        const extension = songSplit[songSplit.length - 1].toLowerCase();
+        const validExtensions = ["mp3", "ogg"]; // Extensiones válidas para la canción
+
+        if (!validExtensions.includes(extension)) {
+            const filePath = req.file.path;
+            fs.unlinkSync(filePath); // Eliminar el archivo si la extensión no es válida
+
+            return res.status(400).send({
+                status: "error",
+                message: "EXTENSIÓN del archivo INVALIDA."
+            });
+        }
+
+        const songUpdated = await Song.findOneAndUpdate(
+            { _id: songId },
+            { audio: req.file.filename }, // Guardar el nombre del archivo en la base de datos
+            { new: true }
+        );
+
+        if (!songUpdated) {
+            return res.status(500).send({
+                status: "error",
+                message: "Error en la SUBIDA de la canción"
+            });
+        }
+
+        return res.status(200).send({
+            status: "success",
+            song: songUpdated,
+            file: req.file
+        });
+
+    } catch (error) {
+        return res.status(500).send({
+            status: "error",
+            message: "Se produjo un error en el servidor.",
+            error: error.message
+        });
+    }
+};
+
+// Método para recuperar y enviar la canción desde el servidor
+const audio = (req, res) => {
+    const file = req.params.file;
+    const filePath = path.join(__dirname, '..', 'uploads', 'songs', file);
+
+    fs.stat(filePath, (error) => {
+        if (error) {
+            return res.status(404).send({
+                status: "error",
+                message: "NO EXISTE la canción",
+                filePath, // Mostrar la ruta completa
+                file      // Mostrar el nombre del archivo
+            });
+        }
+
+        return res.sendFile(filePath);
+    });
+};
+
+// Exportación de las funciones del controlador
+module.exports = { prueba, save, one, list, update, remove, audio, uploadSong, upload };
+>>>>>>> e06abdaa1da064075d6ad77fa056473ae7f0bbf6
