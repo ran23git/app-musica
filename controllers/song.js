@@ -76,4 +76,39 @@ const one = async (req, res) => {
         });
     }
 };
-module.exports = {prueba, save, one}
+
+
+// //LISTADOS de canciones ############################################
+const list = async (req, res) => {
+    try {
+        // Recoger id del album
+        let albumId = req.params.albumId;
+
+        // Hacer consulta con await
+        const songs = await Song.find({ album: albumId }).sort("track");
+
+        // Comprobar si no hay canciones
+        if (!songs || songs.length === 0) {
+            return res.status(404).send({
+                status: "error",
+                message: "NO hay canciones"
+            });
+        }
+
+        // Si todo sale bien, devolver las canciones
+        return res.status(200).send({
+            status: "success",
+            songs
+        });
+
+    } catch (error) {
+        // Si ocurre un error en la consulta
+        return res.status(500).send({
+            status: "error",
+            message: "Error al obtener las canciones",
+            error
+        });
+    }
+};
+
+module.exports = {prueba, save, one, list}
