@@ -111,4 +111,40 @@ const list = async (req, res) => {
     }
 };
 
-module.exports = {prueba, save, one, list}
+// ACTUALIZAR canciones ############################################
+const update = async (req, res) => {
+    try {
+        // parámetro url id de canción
+        let songId = req.params.id;
+
+        // datos para guardar
+        let data = req.body;
+
+        // búsqueda y actualización usando async/await
+        const songUpdated = await Song.findByIdAndUpdate(songId, data, { new: true });
+
+        // Si no se encontró o no se actualizó la canción
+        if (!songUpdated) {
+            return res.status(500).send({
+                status: "error",
+                message: "La canción NO se ha actualizado"
+            });
+        }
+
+        // Respuesta exitosa
+        return res.status(200).send({
+            status: "success",
+            song: songUpdated
+        });
+
+    } catch (error) {
+        // Manejo de errores
+        return res.status(500).send({
+            status: "error",
+            message: "Hubo un error al intentar actualizar la canción",
+            error: error.message
+        });
+    }
+};
+
+module.exports = {prueba, save, one, list, update}
