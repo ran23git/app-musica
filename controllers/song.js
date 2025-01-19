@@ -147,4 +147,37 @@ const update = async (req, res) => {
     }
 };
 
-module.exports = {prueba, save, one, list, update}
+
+// BORRADO de  canciones ############################################
+const remove = async (req, res) => {
+    try {
+        // parámetro url id de canción
+        let songId = req.params.id;
+
+        // eliminación usando async/await con findByIdAndDelete
+        const songRemoved = await Song.findByIdAndDelete(songId);
+
+        // Si no se encontró o no se eliminó la canción
+        if (!songRemoved) {
+            return res.status(500).send({
+                status: "error",
+                message: "NO se ha borrado la canción"
+            });
+        }
+
+        // Respuesta exitosa
+        return res.status(200).send({
+            status: "success",
+            song: songRemoved
+        });
+
+    } catch (error) {
+        // Manejo de errores
+        return res.status(500).send({
+            status: "error",
+            message: "Hubo un error al intentar borrar la canción",
+            error: error.message
+        });
+    }
+};
+module.exports = {prueba, save, one, list, update, remove}
