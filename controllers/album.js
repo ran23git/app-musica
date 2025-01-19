@@ -242,41 +242,7 @@ const upload = async (req, res) => {
 
 //SACAR el AVATAR y mostrarlo en el ENDPOINT#####################################################################################################################
 
-    // // Si fs ya está importado en otra parte del archivo, no lo vuelvas a declarar
-    // const image = (req, res) => {   //se define una función llamada avatar, que recibe dos parámetros: req (la solicitud) y 
-    //     //res (la respuesta). Esta función se usará como un controlador en un servidor.
-    //     // 1° Sacar el PARAMETRO de la url--------------
-    //     const file = req.params.file; //Se extrae el parámetro file de la URL de la solicitud. Este parámetro se espera 
-    //     //que contenga el nombre del archivo que se quiere acceder.
-
-    //     // 2° Montar el PATH real de la imagen----------------
-    //     //const filePath = path.join(__dirname, 'uploads', 'avatars', file); //Se construye la ruta completa hacia el archivo de imagen. path.join combina
-    //     // el directorio actual (__dirname) con las carpetas uploads y avatars, y el nombre del archivo, creando una ruta absoluta.
-    //    // const filePath = "./uploads/avatars/" + file;
-    //     const filePath = path.join(__dirname, '..', 'uploads', 'albums', file);
-    //     //funciono con el path ultimo
-
-    //     // 3° Comprobar que el archivo EXISTE------------------
-    //     fs.stat(filePath, (error) => { //Se utiliza fs.stat para verificar si el archivo en la ruta filePath existe. Si hay un 
-    //         //error (por ejemplo, si el archivo no se encuentra), se ejecuta la función de callback.
-
-    //         if (error) { //Si hay un error, se devuelve una respuesta con el estado HTTP 404 (No encontrado)
-    //             return res.status(404).send({
-    //                 status: "error",
-    //                 message: "NO EXISTE la imagen",
-    //                 filePath, //muestra el path con el nombre del archivo
-    //                 file,     //muestra el nombre del archivo
-    //                 __dirname //muestra el path
-    //             });
-    //         }
-
-    //         // 4° Si SI existe, devolver un FILE---------------
-    //         //Si el archivo existe, se envía como respuesta al cliente usando res.sendFile, que envía el archivo como una respuesta HTTP.
-    //         return res.sendFile(filePath);
-    //     });
-    // };
-
-    const image = (req, res) => {
+      const image = (req, res) => {
         // 1° Sacar el PARAMETRO de la URL--------------
         const file = req.params.file; // Se extrae el parámetro file de la URL de la solicitud.
     
@@ -301,6 +267,11 @@ const upload = async (req, res) => {
             return res.sendFile(filePath); // Si el archivo existe, se envía como respuesta
         });
     };
+
+
+    //OBTENER 1 cancion#####################################################################################################################
+
+
 
 module.exports = { prueba, save, one, list, update, upload, image };
 

@@ -8,7 +8,7 @@ const prueba = (req, res) => {
 }
 
 
-//GRABAR############################################
+//GRABAR una cancion ############################################
 const save = async (req, res) => {
     try {
         // Recoger los parámetros que me llegan del cuerpo de la solicitud
@@ -44,4 +44,36 @@ const save = async (req, res) => {
     }
 };
 
-module.exports = {prueba, save}
+
+//MOSTRAR una cancion ############################################
+const one = async (req, res) => {
+    try {
+        let songId = req.params.id;
+
+        // Usamos `await` para esperar el resultado de la búsqueda
+        const song = await Song.findById(songId).populate("album");
+
+        // Si no se encuentra la canción, se retorna un error 404
+        if (!song) {
+            return res.status(404).send({
+                status: "error",
+                message: "La canción NO EXISTE"
+            });
+        }
+
+        // Si todo sale bien, retornamos la canción
+        return res.status(200).send({
+            status: "success",
+            song
+        });
+
+    } catch (error) {
+        // Si ocurre algún error, retornamos un error 500
+        return res.status(500).send({
+            status: "error",
+            message: "Error al obtener la canción",
+            error
+        });
+    }
+};
+module.exports = {prueba, save, one}

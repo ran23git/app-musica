@@ -13,9 +13,9 @@ const SongController = require("../controllers/song");//y ya tengo acceso a todo
 const { prueba } = require("../controllers/song");
  
 //definir RUTAS
-router.get("/prueba", SongController.prueba)
+router.get("/prueba", SongController.prueba);
 router.post("/save", check.auth, SongController.save);  
-
+router.get("/one/:id", check.auth, SongController.one);  
 
 //exportar ROUTES
 module.exports = router;
