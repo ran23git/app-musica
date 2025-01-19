@@ -18,6 +18,7 @@ router.post("/save", check.auth, SongController.save);
 router.get("/one/:id", check.auth, SongController.one);  
 router.get("/list/:albumId", check.auth, SongController.list);  
 router.put("/update/:id", check.auth, SongController.update);  
+router.delete("/remove/:id", check.auth, SongController.remove);  
 
 //exportar ROUTES
 module.exports = router;

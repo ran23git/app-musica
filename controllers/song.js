@@ -1,4 +1,5 @@
 const Song = require("../models/song");
+const mongoose = require('mongoose');
 
 const prueba = (req, res) => {
     return res.status(200).send({
@@ -147,4 +148,75 @@ const update = async (req, res) => {
     }
 };
 
-module.exports = {prueba, save, one, list, update}
+// BORRRADO de canciones ############################################
+// const remove = async (req, res) => {
+//     try {
+//         // parámetro url id de canción
+//         let songId = req.params.id;
+
+//         //eliminacion
+//         const songRemoved = await Song.findByIdDelete(songId);
+
+//         //si no se encontro o no se elimino la cancion
+//         if(!songRemoved){
+//             return res.status(500).send({
+//                 status: "error",
+//                 message: "NO se ha borrado a cancion"
+//             });
+//         }
+
+//         //respuesta exitosa
+//         return res.status(200).send({
+//             status: "success",
+//             song:songRemoved
+//         });
+//     }catch(error){
+//         //manejo de errores
+//         return res.status(500).send({
+//             status: "error",
+//             message: "Hubo un ERROR al intentar BORRAR la cancion"
+//         });
+//     }
+// };
+
+const remove = async (req, res) => {
+    try {
+        // Parámetro URL id de la canción
+        let songId = req.params.id;
+
+        // Validación del ID
+        if (!mongoose.Types.ObjectId.isValid(songId)) {
+            return res.status(400).send({
+                status: "error",
+                message: "El ID de la canción no es válido"
+            });
+        }
+
+        // Eliminación de la canción
+        const songRemoved = await Song.findByIdAndDelete(songId);
+
+        // Si no se encontró o no se eliminó la canción
+        if (!songRemoved) {
+            return res.status(404).send({
+                status: "error",
+                message: "No se encontró la canción con ese ID"
+            });
+        }
+
+        // Respuesta exitosa
+        return res.status(200).send({
+            status: "success",
+            song: songRemoved
+        });
+    } catch (error) {
+        // Manejo de errores
+        console.error(error);  // Imprime detalles del error en la consola
+        return res.status(500).send({
+            status: "error",
+            message: "Hubo un ERROR al intentar BORRAR la canción"
+        });
+    }
+};
+
+
+module.exports = {prueba, save, one, list, update, remove}
