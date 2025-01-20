@@ -33,7 +33,6 @@ router.get("/one/:id", check.auth, AlbumController.one);  //recuperar 1 album
 router.get("/list/:artistId", check.auth, AlbumController.list);  //recuperar TODOS los albums
 router.put("/update/:albumId", check.auth, AlbumController.update);  //ACTUALIZA un album
 router.post("/upload/:id", [check.auth, uploads.single("file0")],   AlbumController.upload);  //sube imagen
-router.get("/image/:file",  AlbumController.image);   //Lee       info en backend de UN usuario
-
+router.delete("/remove/:id", check.auth, AlbumController.remove); 
 //exportar ROUTES
 module.exports = router;

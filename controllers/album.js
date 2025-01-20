@@ -269,10 +269,72 @@ const upload = async (req, res) => {
     };
 
 
-    //OBTENER 1 cancion#####################################################################################################################
+    //BORRAR ALBUM y todas las canciones que tengan que ver con ese album #####################################################################################################################
+const remove = async (req, res) => {
+    try {
+        // Obtener el id del album de la URL
+        const id = req.params.id;
+
+        // Buscar el album
+        const albumDeleted = await Album.findByIdAndDelete(id);
+
+        // Si no se encuentra el album con ese ID
+        if (!albumDeleted) {
+            return res.status(404).send({
+                status: "error",
+                message: "No se encontró el album con el ID proporcionado"
+            });
+        }
+
+        try {
+            // Buscar todos los álbumes del album
+            const albums = await Album.find({ album: id });
+
+            // Arreglo para almacenar los álbumes eliminados y canciones eliminadas
+            const albumsDeleted = [];
+            const songsDeleted = [];
+
+            // Eliminar todos los álbumes del album
+            for (const album of albums) {
+                // Eliminar todas las canciones asociadas al álbum
+                const songs = await Song.deleteMany({ album: album._id });
+                songsDeleted.push(songs.deletedCount); // Almacenar el número de canciones eliminadas
+
+                // Eliminar el álbum
+                const albumDeleted = await album.delete();
+                albumsDeleted.push(albumDeleted); // Almacenar el álbum eliminado
+            }
+
+            // Devolver una respuesta exitosa con la información del album, álbumes y canciones eliminadas
+            return res.status(200).send({
+                status: "success",
+                message: "El album y sus álbumes han sido eliminados",
+                album: albumDeleted,
+                albumsDeleted, // Muestra los álbumes eliminados
+                songsDeleted   // Muestra las canciones eliminadas
+            });
+
+        } catch (error) {
+            // Manejo de errores en la eliminación de álbumes y canciones
+            return res.status(500).send({
+                status: "error",
+                message: "Error al eliminar los álbumes o canciones",
+                error: error.message
+            });
+        }
+    } catch (error) {
+        // Manejo de errores en la eliminación del album
+        return res.status(500).send({
+            status: "error",
+            message: "Error al eliminar el album",
+            error: error.message
+        });
+    }
+};
 
 
 
-module.exports = { prueba, save, one, list, update, upload, image };
+
+module.exports = { prueba, save, one, list, update, upload, image, remove };
 
 
