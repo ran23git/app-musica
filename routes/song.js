@@ -20,16 +20,15 @@ router.post("/save", check.auth, SongController.save);
 router.get("/one/:id", check.auth, SongController.one);  
 router.get("/list/:albumId", check.auth, SongController.list);  
 router.put("/update/:id", check.auth, SongController.update);  
-<<<<<<< HEAD
-router.delete("/remove/:id", check.auth, SongController.remove);  
-=======
+
+
 router.delete("/remove/:id", check.auth, SongController.remove);
 
 
 // Para subir la canción
 router.put('/upload/:id', [check.auth, upload.single('file0')], SongController.uploadSong);
 router.get('/audio/:file', SongController.audio);
->>>>>>> e06abdaa1da064075d6ad77fa056473ae7f0bbf6
+
 
 //exportar ROUTES
 module.exports = router;
