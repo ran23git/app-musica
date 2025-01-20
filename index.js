@@ -37,6 +37,7 @@ const SongRoutes    = require("./routes/song");   //cargue asi el archivo de rut
 //  las rutas definidas en los archivos correspondientes.
 app.use("/api/user",       UserRoutes);
 app.use("/api/artists", ArtistsRoutes);
+//app.use("/api/artist", artistRoutes);
 app.use("/api/album",     AlbumRoutes);
 app.use("/api/song",       SongRoutes);
 

@@ -2,6 +2,8 @@
 const express = require("express"); //importo express para crear las rutas de la API
 const check = require("../middlewares/auth");
 
+
+const {remove} = require("../controllers/artists");
 //cargar ROUTER
 const router = express.Router();//y ya tengo acceso al Router para CREAR mis RUTAS
 
@@ -41,6 +43,9 @@ router.put("/update/:id", check.auth, ArtistController.update);  //editar artist
 router.delete("/remove/:id", check.auth, ArtistController.remove);  //borrar artista
 router.post("/upload/:id", [check.auth, uploads.single("file0")],   ArtistController.upload);  //sube imagen
 router.get("/image/:file",  ArtistController.image);   //Lee       info en backend de UN usuario
+//router.delete("/api/artist/remove/:id", remove);
+router.delete("/remove/:id", check.auth, ArtistController.remove);
+
 
 //exportar ROUTES
 module.exports = router;

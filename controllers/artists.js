@@ -153,6 +153,53 @@ const update = async (req, res) => {
 
 
 //ELIMINAR artista el ALBU, y las CANCIONES #####################################################################################################################
+// const remove = async (req, res) => {
+//     try {
+//         // Obtener el id del artista de la URL
+//         const id = req.params.id;
+
+//         // Buscar el artista
+//         const artistDeleted = await Artist.findByIdAndDelete(id);
+
+//         // Si no se encuentra el artista con ese ID
+//         if (!artistDeleted) {
+//             return res.status(404).send({
+//                 status: "error",
+//                 message: "No se encontró el artista con el ID proporcionado"
+//             });
+//         }
+
+       
+//         // Buscar todos los álbumes del artista
+//         const albums = await Album.find({ artist: id });
+
+//         // Eliminar todos los álbumes del artista
+//         const albumsDeleted = await Album.deleteMany({ artist: id });
+
+//         // Obtener los IDs de los álbumes eliminados
+//         const albumIds = albums.map(album => album._id);
+
+//         // Eliminar todas las canciones asociadas a esos álbumes
+//         const songsDeleted = await Song.deleteMany({ album: { $in: albumIds } });
+
+//         // Devolver una respuesta exitosa
+//         return res.status(200).send({
+//             status: "success",
+//             message: "El artista ha sido eliminado",
+//             artist: artistDeleted,
+//             albumsDeleted, // Muestra los álbumes eliminados
+//             songsDeleted   // Muestra las canciones eliminadas
+//         });
+//     } catch (error) {
+//         // Manejo de errores
+//         return res.status(500).send({
+//             status: "error",
+//             message: "Error al eliminar el artista",
+//             error: error.message
+//         });
+//     }
+// };
+
 const remove = async (req, res) => {
     try {
         // Obtener el id del artista de la URL
@@ -169,28 +216,44 @@ const remove = async (req, res) => {
             });
         }
 
-        // Buscar todos los álbumes del artista
-        const albums = await Album.find({ artist: id });
+        try {
+            // Buscar todos los álbumes del artista
+            const albums = await Album.find({ artist: id });
 
-        // Eliminar todos los álbumes del artista
-        const albumsDeleted = await Album.deleteMany({ artist: id });
+            // Arreglo para almacenar los álbumes eliminados y canciones eliminadas
+            const albumsDeleted = [];
+            const songsDeleted = [];
 
-        // Obtener los IDs de los álbumes eliminados
-        const albumIds = albums.map(album => album._id);
+            // Eliminar todos los álbumes del artista
+            for (const album of albums) {
+                // Eliminar todas las canciones asociadas al álbum
+                const songs = await Song.deleteMany({ album: album._id });
+                songsDeleted.push(songs.deletedCount); // Almacenar el número de canciones eliminadas
 
-        // Eliminar todas las canciones asociadas a esos álbumes
-        const songsDeleted = await Song.deleteMany({ album: { $in: albumIds } });
+                // Eliminar el álbum
+                const albumDeleted = await album.delete();
+                albumsDeleted.push(albumDeleted); // Almacenar el álbum eliminado
+            }
 
-        // Devolver una respuesta exitosa
-        return res.status(200).send({
-            status: "success",
-            message: "El artista ha sido eliminado",
-            artist: artistDeleted,
-            albumsDeleted, // Muestra los álbumes eliminados
-            songsDeleted   // Muestra las canciones eliminadas
-        });
+            // Devolver una respuesta exitosa con la información del artista, álbumes y canciones eliminadas
+            return res.status(200).send({
+                status: "success",
+                message: "El artista y sus álbumes han sido eliminados",
+                artist: artistDeleted,
+                albumsDeleted, // Muestra los álbumes eliminados
+                songsDeleted   // Muestra las canciones eliminadas
+            });
+
+        } catch (error) {
+            // Manejo de errores en la eliminación de álbumes y canciones
+            return res.status(500).send({
+                status: "error",
+                message: "Error al eliminar los álbumes o canciones",
+                error: error.message
+            });
+        }
     } catch (error) {
-        // Manejo de errores
+        // Manejo de errores en la eliminación del artista
         return res.status(500).send({
             status: "error",
             message: "Error al eliminar el artista",
